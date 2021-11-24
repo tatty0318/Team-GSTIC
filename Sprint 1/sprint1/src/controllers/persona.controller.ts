@@ -1,30 +1,60 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
+  del, get,
+  getModelSchemaRef, HttpErrors, param, patch, post, put, requestBody,
+  response
 } from '@loopback/rest';
-import {Persona} from '../models';
+import {Credenciales, Persona} from '../models';
 import {PersonaRepository} from '../repositories';
+import {AutenticacionService, NotificacionService} from '../services';
 
 export class PersonaController {
   constructor(
     @repository(PersonaRepository)
-    public personaRepository : PersonaRepository,
-  ) {}
+    public personaRepository: PersonaRepository,
+
+    @service(NotificacionService)
+    public notificaciones: NotificacionService,
+
+    @service(AutenticacionService)
+    public servicioAutenticacion: AutenticacionService,
+  ) { }
+
+  @post("/identificarPersona", {
+    responses: {
+      '200': {
+        description: "Identificacion de usuarios"
+      }
+    }
+  })
+  async identificarPersona(
+    @requestBody() credenciales: Credenciales
+  ) {
+    let p = await this.servicioAutenticacion.IdentificarPersona(credenciales.usuario, credenciales.clave);
+    if (p) {
+      let token = this.servicioAutenticacion.GenerarTokenJWT(p);
+      return {
+        datos: {
+          nombre: p.nombres + " " + p.apellidos,
+          correo: p.email,
+          id: p.id
+        },
+        tk: token
+      }
+    } else {
+      throw new HttpErrors[401]("Datos invalidos");
+    }
+
+  }
+
 
   @post('/personas')
   @response(200, {
@@ -37,14 +67,22 @@ export class PersonaController {
         'application/json': {
           schema: getModelSchemaRef(Persona, {
             title: 'NewPersona',
-            exclude: ['id'],
+
           }),
         },
       },
     })
-    persona: Omit<Persona, 'id'>,
+    persona: Persona,
   ): Promise<Persona> {
-    return this.personaRepository.create(persona);
+
+    let clave = this.servicioAutenticacion.GenerarClave();
+    let claveCifrada = this.servicioAutenticacion.CifrarClave(clave);
+    persona.clave = claveCifrada;
+
+    this.notificaciones.EnviarNotificacionesSMS(persona.telefono, persona.nombres, persona.email, persona.clave);
+    let p = await this.personaRepository.create(persona);
+
+    return p;
   }
 
   @get('/personas/count')

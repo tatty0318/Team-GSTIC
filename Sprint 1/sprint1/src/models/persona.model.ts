@@ -1,4 +1,4 @@
-import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {Entity, hasOne, model, property} from '@loopback/repository';
 import {Empleado} from './empleado.model';
 
 @model()
@@ -6,9 +6,10 @@ export class Persona extends Entity {
   @property({
     type: 'string',
     id: true,
-    generated: true,
+    generated: false,
+    required: true,
   })
-  id?: string;
+  id: string;
 
   @property({
     type: 'string',
@@ -48,12 +49,28 @@ export class Persona extends Entity {
 
   @property({
     type: 'string',
+    required: false,
+  })
+  clave: string;
+
+  @property({
+    type: 'string',
     required: true,
   })
   fechaNacimiento: string;
 
-  @belongsTo(() => Empleado)
-  empleadoId: string;
+  @hasOne(() => Empleado)
+  empleado: Empleado;
+
+  @property({
+    type: 'string',
+  })
+  empleadoId?: string;
+
+  @property({
+    type: 'string',
+  })
+  notificacionesPersonaId?: string;
 
   constructor(data?: Partial<Persona>) {
     super(data);

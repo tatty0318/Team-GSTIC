@@ -1,41 +1,47 @@
-import {Entity, model, property, belongsTo} from '@loopback/repository';
-import {Empresa} from './empresa.model';
+import {Entity, model, property, hasMany} from '@loopback/repository';
+import {NotificacionesPersona} from './notificaciones-persona.model';
+import {Persona} from './persona.model';
 
 @model()
 export class Empleado extends Entity {
   @property({
     type: 'string',
     id: true,
-    generated: true,
+    generated: false,
+    required: true,
   })
-  id?: string;
+  id: string;
+
+  @property({
+    type: 'number',
+    required: true,
+  })
+  salario: number;
+
+  @property({
+    type: 'boolean',
+    required: true,
+  })
+  esDirectivo: number;
+
+  @property({
+    type: 'boolean',
+    required: true,
+  })
+  esCliente: number;
 
   @property({
     type: 'string',
-    required: true,
   })
-  personaId: string;
+  personaId?: string;
 
   @property({
     type: 'string',
-    required: true,
   })
-  salario: string;
+  empresaId?: string;
 
-  @property({
-    type: 'string',
-    required: true,
-  })
-  esDirectivo: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
-  esCliente: string;
-
-  @belongsTo(() => Empresa)
-  empresaId: string;
+  @hasMany(() => NotificacionesPersona, {through: {model: () => Persona}})
+  notificacionesPersonas: NotificacionesPersona[];
 
   constructor(data?: Partial<Empleado>) {
     super(data);

@@ -1,9 +1,9 @@
-import {ApplicationConfig, Sprint1Application} from './application';
+import {ApplicationConfig, ApiempresaApplication} from './application';
 
 export * from './application';
 
 export async function main(options: ApplicationConfig = {}) {
-  const app = new Sprint1Application(options);
+  const app = new ApiempresaApplication(options);
   await app.boot();
   await app.start();
 
