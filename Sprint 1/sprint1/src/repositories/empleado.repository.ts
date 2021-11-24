@@ -1,8 +1,9 @@
 import {inject, Getter} from '@loopback/core';
-import {DefaultCrudRepository, repository, BelongsToAccessor} from '@loopback/repository';
-import {MongoDataSource} from '../datasources';
-import {Empleado, EmpleadoRelations, Empresa} from '../models';
-import {EmpresaRepository} from './empresa.repository';
+import {DefaultCrudRepository, repository, HasManyThroughRepositoryFactory} from '@loopback/repository';
+import {Sprint1DataSource} from '../datasources';
+import {Empleado, EmpleadoRelations, NotificacionesPersona, Persona} from '../models';
+import {PersonaRepository} from './persona.repository';
+import {NotificacionesPersonaRepository} from './notificaciones-persona.repository';
 
 export class EmpleadoRepository extends DefaultCrudRepository<
   Empleado,
@@ -10,13 +11,16 @@ export class EmpleadoRepository extends DefaultCrudRepository<
   EmpleadoRelations
 > {
 
-  public readonly empresa: BelongsToAccessor<Empresa, typeof Empleado.prototype.id>;
+  public readonly notificacionesPersonas: HasManyThroughRepositoryFactory<NotificacionesPersona, typeof NotificacionesPersona.prototype.id,
+          Persona,
+          typeof Empleado.prototype.id
+        >;
 
   constructor(
-    @inject('datasources.mongo') dataSource: MongoDataSource, @repository.getter('EmpresaRepository') protected empresaRepositoryGetter: Getter<EmpresaRepository>,
+    @inject('datasources.Sprint1') dataSource: Sprint1DataSource, @repository.getter('PersonaRepository') protected personaRepositoryGetter: Getter<PersonaRepository>, @repository.getter('NotificacionesPersonaRepository') protected notificacionesPersonaRepositoryGetter: Getter<NotificacionesPersonaRepository>,
   ) {
     super(Empleado, dataSource);
-    this.empresa = this.createBelongsToAccessorFor('empresa', empresaRepositoryGetter,);
-    this.registerInclusionResolver('empresa', this.empresa.inclusionResolver);
+    this.notificacionesPersonas = this.createHasManyThroughRepositoryFactoryFor('notificacionesPersonas', notificacionesPersonaRepositoryGetter, personaRepositoryGetter,);
+    this.registerInclusionResolver('notificacionesPersonas', this.notificacionesPersonas.inclusionResolver);
   }
 }
