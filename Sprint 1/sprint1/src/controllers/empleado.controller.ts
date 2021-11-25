@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -14,11 +15,13 @@ import {
 import {Empleado} from '../models';
 import {EmpleadoRepository} from '../repositories';
 
+@authenticate("admin") //Me protege todas las acciones del controlador excepto aquellas que tengan el @authenticate.skip
 export class EmpleadoController {
   constructor(
     @repository(EmpleadoRepository)
     public empleadoRepository: EmpleadoRepository,
   ) { }
+
 
   @post('/empleados')
   @response(200, {
@@ -41,6 +44,7 @@ export class EmpleadoController {
     return this.empleadoRepository.create(empleado);
   }
 
+
   @get('/empleados/count')
   @response(200, {
     description: 'Empleado model count',
@@ -52,6 +56,7 @@ export class EmpleadoController {
     return this.empleadoRepository.count(where);
   }
 
+  @authenticate.skip()
   @get('/empleados')
   @response(200, {
     description: 'Array of Empleado model instances',
