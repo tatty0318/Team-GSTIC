@@ -56,7 +56,7 @@ export class EmpleadoController {
     return this.empleadoRepository.count(where);
   }
 
-  @authenticate.skip()
+  //@authenticate.skip()
   @get('/empleados')
   @response(200, {
     description: 'Array of Empleado model instances',

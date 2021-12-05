@@ -1,0 +1,23 @@
+body{
+  background-color: darkslategrey;
+}
+
+input{
+  border: 3px double dimgray;
+  text-align: center;
+  color: black;
+}
+
+#miDivision{ /* con # son para identificadores con @ para etiquetas */
+  border: 4px inherit rgb(179, 159, 134);
+  height: unset;
+  width: 80%;
+}
+
+.fondoTeal{ /* con # son para identificadores con @ para etiquetas */
+  background-color: teal;
+}
+
+input[type = button]:hover{
+  cursor: pointer; /*para que cambie por una manito cuando esta encima del boton */
+}
